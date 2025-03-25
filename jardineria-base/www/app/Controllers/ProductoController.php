@@ -58,6 +58,7 @@ class ProductoController extends BaseController
         $modelo = new ProductoModel();
         $producto = $modelo->getByCodigo($codigo);
 
+
         if($producto != false){
             $respuesta = new Respuesta(200,$producto);
         }else{
