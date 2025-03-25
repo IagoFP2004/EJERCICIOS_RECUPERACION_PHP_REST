@@ -1,0 +1,21 @@
+{
+    "name": "com/daw2",
+    "description": "Proyecto Jardinería API",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Com\\Jardineria\\": "app/"
+        }
+    },
+    "require": {
+        "steampixel/simple-php-router": "^0.7.1",
+        "vlucas/phpdotenv": "^5.5",
+        "ext-pdo": "*",
+        "ext-decimal": "*",
+        "ext-mbstring": "*",
+        "ext-openssl": "*",
+        "ext-gd": "*",
+        "adhocore/jwt": "^1.1"
+    }
+}
