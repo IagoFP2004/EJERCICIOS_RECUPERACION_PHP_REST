@@ -130,6 +130,23 @@ class EmpleadoModel extends BaseDbModel
         return  $stmt->rowCount()===1;
     }
 
+    public function patchEmpleado(int $codigo, array $data):bool
+    {
+        if (!empty($data)){
+            $sql = "UPDATE empleado SET ";
+            $campos = [];
+            foreach ($data as $key => $value) {
+                $campos[] = "$key = :$key";
+            }
+            $sql .= implode(', ', $campos);
+            $sql .= " WHERE codigo_empleado = :codigo_empleado";
+            $data['codigo_empleado'] = $codigo;
+            return  $stmt = $this->pdo->prepare($sql)->execute($data);
+        }else{
+            return false;
+        }
+    }
+
     public function getByEmail(string $email):array | false
     {
         $sql = "SELECT * FROM empleado WHERE email = :email";

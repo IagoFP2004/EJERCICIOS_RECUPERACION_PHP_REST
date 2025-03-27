@@ -6,9 +6,14 @@ use Com\Jardineria\Core\BaseController;
 use Com\Jardineria\Libraries\Respuesta;
 use Com\Jardineria\Models\EmpleadoModel;
 use Com\Jardineria\Models\OficinaModel;
+use Com\Jardineria\Traits\BaseRestController;
 
 class EmpleadoController extends BaseController
 {
+    use BaseRestController;
+
+    public const CAMPOS =  ['codigo_empleado','nombre','apellido1','apellido2','extension','email','codigo_oficina','codigo_jefe','puesto'];
+
     public function getEmpleados():void
     {
         $modelo = new EmpleadoModel();
@@ -68,19 +73,48 @@ class EmpleadoController extends BaseController
         $this->view->show('json.view.php',['respuesta'=>$respuesta]);
     }
 
+    public function updateEmpleado(int $codigo_empleado):void
+    {
+        $put  = $this->getParams();
+        $errores = $this->checkErrors($put, $codigo_empleado);
+
+        if ($errores ===[]){
+            $modelo = new EmpleadoModel();
+            $updateData=[];
+            foreach (self::CAMPOS as $campo){
+                if (isset($put[$campo])){
+                    $updateData[$campo]=$put[$campo];
+                }
+            }
+            if ($updateData !== false){
+                if ($modelo->patchEmpleado($codigo_empleado,$updateData)){
+                    $respuesta = new Respuesta(200,['Mensaje'=>'Usuario actualizado correctamente']);
+                }else{
+                    $respuesta = new Respuesta(400,['Error'=>'No se pudo actualizar el usuario']);
+                }
+            }
+        }else{
+            $respuesta = new Respuesta(400,$errores);
+        }
+
+        $this->view->show('json.view.php',['respuesta'=>$respuesta]);
+    }
+
     public function checkErrors(array $data, ?int $codigo_empleado = null): array
     {
         $modelo = new EmpleadoModel();
         $modeloOficina = new OficinaModel();
         $errors = [];
+        $editando = !is_null($codigo_empleado);
 
-        if(!isset($data['nombre']) || empty($data['nombre'])){
+        if (!$editando){
+        if(!$editando && (!isset($data['nombre']) || empty($data['nombre']))){
             $errors['nombre'] = 'Nombre es requerido';
         }else if (strlen($data['nombre']) > 50){
             $errors['nombre'] = 'Nombre debe tener mas de 50 caracteres';
         }
 
-        if(!isset($data['apellido1']) || empty($data['apellido1'])){
+        if(!$editando && (!isset($data['apellido1']) || empty($data['apellido1']))){
             $errors['apellido1'] = 'El primer apellido es requerido';
         }else if (strlen($data['apellido1']) > 50){
             $errors['apellido1'] = 'El primer apellido debe tener mas de 50 caracteres';
@@ -92,13 +126,13 @@ class EmpleadoController extends BaseController
             }
         }
 
-        if(!isset($data['extension']) || empty($data['extension'])){
+        if(!$editando && !isset($data['extension']) || empty($data['extension'])){
             $errors['extension'] = 'La extension es requerida';
         }else if (strlen($data['extension']) > 10){
             $errors['extension'] = 'La extension es requerida';
         }
 
-        if (!isset($data['email']) || empty($data['email'])){
+        if (!$editando && !isset($data['email']) || empty($data['email'])){
             $errors['email'] = 'El email es requerido';
         }else if (filter_var($data['email'], FILTER_VALIDATE_EMAIL)===false){
             $errors['email'] = 'El email no es valido';
@@ -108,7 +142,7 @@ class EmpleadoController extends BaseController
             $errors['email'] = 'El email ya existe';
         }
 
-        if (!isset($data['codigo_oficina']) || empty($data['codigo_oficina'])){
+        if (!$editando && !isset($data['codigo_oficina']) || empty($data['codigo_oficina'])){
             $errors['codigo_oficina'] = 'El codigo Oficina es requerido';
         }else if(!isset($data['codigo_oficina']) || strlen($data['codigo_oficina']) > 100){
             $errors['codigo_oficina'] = 'El codigo Oficina debe ser un texto no mayor que 100 caracteres';
@@ -127,6 +161,8 @@ class EmpleadoController extends BaseController
                 $errors['puesto'] = 'El puesto no debe tener mas de 50 caracteres';
             }
         }
+        }
+
 
         return $errors;
     }

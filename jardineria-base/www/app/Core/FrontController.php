@@ -86,6 +86,14 @@ class FrontController
             'delete'
         );
 
+        Route::add(
+            '/empleado/([0-9]+)',
+            function ($codigo) {
+                (new EmpleadoController())->updateEmpleado((int) $codigo);
+            },
+            'patch'
+        );
+
         Route::pathNotFound(
             function () {
                 (new ErrorController(404))->showError();
