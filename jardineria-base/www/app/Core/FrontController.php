@@ -2,6 +2,7 @@
 
 namespace Com\Jardineria\Core;
 
+use Com\Jardineria\Controllers\EmpleadoController;
 use Com\Jardineria\Controllers\ErrorController;
 use Com\Jardineria\Controllers\ProductoController;
 use Steampixel\Route;
@@ -10,6 +11,7 @@ class FrontController
 {
     public static function main()
     {
+        //EJERCICIO JARDINERIA I
         Route::add(
             '/producto',
             function () {
@@ -49,6 +51,17 @@ class FrontController
             },
             'patch'
         );
+
+        //EJERCICIO JARDINERIA II
+
+        Route::add(
+            '/empleado',
+            function () {
+                (new EmpleadoController())->getEmpleados();
+            },
+            'get'
+        );
+
 
         Route::pathNotFound(
             function () {
