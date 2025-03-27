@@ -122,6 +122,14 @@ class EmpleadoModel extends BaseDbModel
         return $stmt->execute($data);
     }
 
+    public function delete(int $codigo_empleado):bool
+    {
+        $sql="DELETE FROM empleado WHERE codigo_empleado = :codigo_empleado";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['codigo_empleado' => $codigo_empleado]);
+        return  $stmt->rowCount()===1;
+    }
+
     public function getByEmail(string $email):array | false
     {
         $sql = "SELECT * FROM empleado WHERE email = :email";

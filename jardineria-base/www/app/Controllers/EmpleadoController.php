@@ -39,7 +39,7 @@ class EmpleadoController extends BaseController
         $modelo = new EmpleadoModel();
         $errores = $this->checkErrors($_POST);
 
-        if (empty($errores)){
+        if ($errores ===[]){
             $insertado = $modelo->insertEmpleado($_POST);
 
             if($insertado !== false){
@@ -51,6 +51,20 @@ class EmpleadoController extends BaseController
         }else{
             $respuesta = new Respuesta(400,$errores);
         }
+        $this->view->show('json.view.php',['respuesta'=>$respuesta]);
+    }
+
+    public function deleteEmpleado(int $codigo):void
+    {
+        $modelo = new EmpleadoModel();
+
+        $borrado = $modelo->delete($codigo);
+        if($borrado !== false){
+            $respuesta = new Respuesta(200,['Mensaje'=>'Usuario eliminado correctamente']);
+        }else{
+            $respuesta = new Respuesta(400,['Error'=>'No se pudo eliminar, el usuario no existe']);
+        }
+
         $this->view->show('json.view.php',['respuesta'=>$respuesta]);
     }
 
