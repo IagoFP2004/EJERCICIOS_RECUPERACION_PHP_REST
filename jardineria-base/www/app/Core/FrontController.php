@@ -62,6 +62,21 @@ class FrontController
             'get'
         );
 
+        Route::add(
+            '/empleado/([0-9]+)',
+            function ($codigo) {
+                (new EmpleadoController())->getEmpleado((int) $codigo);
+            },
+            'get'
+        );
+
+        Route::add(
+            '/empleado',
+            function () {
+                (new EmpleadoController())->insertEmpleado();
+            },
+            'post'
+        );
 
         Route::pathNotFound(
             function () {

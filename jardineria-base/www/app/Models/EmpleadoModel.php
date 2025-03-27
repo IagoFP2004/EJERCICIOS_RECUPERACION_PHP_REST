@@ -92,4 +92,52 @@ class EmpleadoModel extends BaseDbModel
         $stmt->execute($valores);
         return $stmt->fetchAll();
     }
+
+    public function getByCodigo(int $codigo):array | false
+    {
+        $sql = "SELECT e.*, e2.nombre as nombre_jefe, e2.apellido1 as apellido1_jefe, e2.apellido2 as apellido2_jefe 
+                FROM  empleado e
+                LEFT JOIN empleado e2 ON e2.codigo_empleado  = e.codigo_jefe WHERE e.codigo_empleado = :codigo";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['codigo' => $codigo]);
+        return $stmt->fetch();
+    }
+
+    public function insertEmpleado(array $data):bool
+    {
+        $sql ="INSERT INTO empleado (`nombre`, `apellido1`, `apellido2`, `extension`, `email`, `codigo_oficina`, `codigo_jefe`, `puesto`) 
+                VALUES (:nombre,:apellido1,:apellido2,:extension,:email,:codigo_oficina,:codigo_jefe,:puesto)";
+
+        if (!isset($data['apellido2'])){
+            $data['apellido2'] = NULL;
+        }
+        if (!isset($data['codigo_jefe'])){
+            $data['codigo_jefe'] = NULL;
+        }
+        if(!isset($data['puesto'])){
+            $data['puesto'] = NULL;
+        }
+
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute($data);
+    }
+
+    public function getByEmail(string $email):array | false
+    {
+        $sql = "SELECT * FROM empleado WHERE email = :email";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['email' => $email]);
+        return $stmt->fetch();
+    }
+
+    public function tieneJefe(int $codigo_empleado):bool
+    {
+        $sql = "SELECT e.codigo_empleado 
+            FROM empleado e 
+            WHERE e.codigo_empleado = :codigo_empleado 
+            AND e.codigo_jefe IS NOT NULL";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['codigo_empleado' => $codigo_empleado]);
+        return $stmt->rowCount() === 1;
+    }
 }
