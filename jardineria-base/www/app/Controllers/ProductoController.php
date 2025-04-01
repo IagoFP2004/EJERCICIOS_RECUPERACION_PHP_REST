@@ -4,7 +4,6 @@ namespace Com\Jardineria\Controllers;
 
 use Com\Jardineria\Core\BaseController;
 use Com\Jardineria\Libraries\Respuesta;
-use Com\Jardineria\Models\GamaModel;
 use Com\Jardineria\Traits\BaseRestController;
 use ErrorException;
 use Com\Jardineria\Models\ProductoModel;
@@ -42,7 +41,7 @@ class ProductoController extends BaseController
                 $modelo = new ProductoModel();
                 $insertar = $modelo->insert($_POST);
                 if ($insertar){
-                    $respuesta = new Respuesta(201,['mensaje'=>$_ENV['base.url']."/producto/".$_POST['codigo_producto']]);
+                    $respuesta = new Respuesta(201,['mensaje'=>'Registro insertado correctamente']);
                 }else{
                     $respuesta = new Respuesta(400,['error'=>'No se pudo insertar el registro']);
                 }
@@ -57,7 +56,6 @@ class ProductoController extends BaseController
     {
         $modelo = new ProductoModel();
         $producto = $modelo->getByCodigo($codigo);
-
 
         if($producto != false){
             $respuesta = new Respuesta(200,$producto);
@@ -114,7 +112,6 @@ class ProductoController extends BaseController
 
     public function checkErrors(array $data, ?string $codigo=null): array
     {
-        $modelo = new GamaModel();
         $errores = [];
         $editando = !is_null($codigo);
         //var_dump($data);
@@ -137,7 +134,7 @@ class ProductoController extends BaseController
 
         if (!$editando && !isset($data['gama'])) {
             $errores['gama'] = 'El gama es obligatorio';
-        } elseif ($modelo->getGama($data['gama']) === false){
+        } elseif (!in_array($data['gama'], ['Aromáticas', 'Frutales', 'Herbaceas', 'Herramientas', 'Ornamentales'])) {
             $errores['gama'] = 'El gama solo puede ser Aromáticas, Frutales, Herbaceas, Herramientas, Ornamentales';
         }
 

@@ -48,7 +48,7 @@ class EmpleadoController extends BaseController
             $insertado = $modelo->insertEmpleado($_POST);
 
             if($insertado !== false){
-                $respuesta = new Respuesta(200,['Mensaje'=>'Usuario registrado correctamente']);
+                $respuesta = new Respuesta(200,['Mensaje'=>$_ENV['base.url'].'/empleado/'.$insertado]);
             }else{
                 $respuesta = new Respuesta(400,['Error'=>'No se pudo insertar el usuario']);
             }
@@ -107,17 +107,20 @@ class EmpleadoController extends BaseController
         $errors = [];
         $editando = !is_null($codigo_empleado);
 
-        if (!$editando){
-        if(!$editando && (!isset($data['nombre']) || empty($data['nombre']))){
-            $errors['nombre'] = 'Nombre es requerido';
-        }else if (strlen($data['nombre']) > 50){
-            $errors['nombre'] = 'Nombre debe tener mas de 50 caracteres';
+        if(!$editando || (!empty($data['nombre']))){
+            if(!$editando && empty($data['nombre'])) {
+                $errors['nombre'] = 'Nombre es requerido';
+            }else if (strlen($data['nombre']) > 50) {
+                $errors['nombre'] = 'Nombre debe tener mas de 50 caracteres';
+            }
         }
 
-        if(!$editando && (!isset($data['apellido1']) || empty($data['apellido1']))){
-            $errors['apellido1'] = 'El primer apellido es requerido';
-        }else if (strlen($data['apellido1']) > 50){
-            $errors['apellido1'] = 'El primer apellido debe tener mas de 50 caracteres';
+        if(!$editando || (!empty($data['apellido1']))){
+            if(!$editando && empty($data['apellido1'])){
+                $errors['apellido1'] = 'El primer apellido es requerido';
+            }else if (strlen($data['apellido1']) > 50) {
+                $errors['apellido1'] = 'El primer apellido debe tener mas de 50 caracteres';
+            }
         }
 
         if(isset($data['apellido2'])){
@@ -126,28 +129,34 @@ class EmpleadoController extends BaseController
             }
         }
 
-        if(!$editando && !isset($data['extension']) || empty($data['extension'])){
-            $errors['extension'] = 'La extension es requerida';
-        }else if (strlen($data['extension']) > 10){
-            $errors['extension'] = 'La extension es requerida';
+        if(!$editando || (!empty($data['extension']))){
+            if(!$editando && empty($data['extension'])) {
+                $errors['extension'] = 'La extension es requerida';
+            }else if (strlen($data['extension']) > 10) {
+                $errors['extension'] = 'La extension es requerida';
+            }
         }
 
-        if (!$editando && !isset($data['email']) || empty($data['email'])){
-            $errors['email'] = 'El email es requerido';
-        }else if (filter_var($data['email'], FILTER_VALIDATE_EMAIL)===false){
-            $errors['email'] = 'El email no es valido';
-        }else if(strlen($data['email']) > 100){
-            $errores['email'] = 'El email debe tener menos de 100 caracteres';
-        }else if ($modelo->getByEmail($data['email']) !== false){
-            $errors['email'] = 'El email ya existe';
+        if (!$editando || (!empty($data['email']))){
+            if(!$editando && empty($data['email'])) {
+                $errors['email'] = 'El email es requerido';
+            }else if (filter_var($data['email'], FILTER_VALIDATE_EMAIL)===false){
+                $errors['email'] = 'El email no es valido';
+            }else if(strlen($data['email']) > 100){
+                $errores['email'] = 'El email debe tener menos de 100 caracteres';
+            }else if ($modelo->getByEmail($data['email']) !== false){
+                $errors['email'] = 'El email ya existe';
+            }
         }
 
-        if (!$editando && !isset($data['codigo_oficina']) || empty($data['codigo_oficina'])){
-            $errors['codigo_oficina'] = 'El codigo Oficina es requerido';
-        }else if(!isset($data['codigo_oficina']) || strlen($data['codigo_oficina']) > 100){
-            $errors['codigo_oficina'] = 'El codigo Oficina debe ser un texto no mayor que 100 caracteres';
-        }else if ($modeloOficina->getByCodigo($data['codigo_oficina'])===false){
-            $errors['codigo_oficina'] = 'El codigo Oficina no es existe';
+        if (!$editando || (!empty($data['codigo_oficina'])) ){
+            if(!$editando && empty($data['codigo_oficina'])) {
+                $errors['codigo_oficina'] = 'El codigo de oficina es requerido';
+            }else if(!isset($data['codigo_oficina']) || strlen($data['codigo_oficina']) > 100){
+                $errors['codigo_oficina'] = 'El codigo Oficina debe ser un texto no mayor que 100 caracteres';
+            }else if ($modeloOficina->getByCodigo($data['codigo_oficina'])===false){
+                $errors['codigo_oficina'] = 'El codigo Oficina no es existe';
+            }
         }
 
         if (isset($data['codigo_jefe'])){
@@ -161,8 +170,6 @@ class EmpleadoController extends BaseController
                 $errors['puesto'] = 'El puesto no debe tener mas de 50 caracteres';
             }
         }
-        }
-
 
         return $errors;
     }
