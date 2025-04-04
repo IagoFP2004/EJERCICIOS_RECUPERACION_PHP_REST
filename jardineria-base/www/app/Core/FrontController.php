@@ -5,6 +5,8 @@ namespace Com\Jardineria\Core;
 use Com\Jardineria\Controllers\EmpleadoController;
 use Com\Jardineria\Controllers\ErrorController;
 use Com\Jardineria\Controllers\ProductoController;
+use Com\Jardineria\Controllers\UsuarioController;
+use Com\Jardineria\Models\UsuarioModel;
 use Steampixel\Route;
 
 class FrontController
@@ -96,7 +98,21 @@ class FrontController
 
         //EJERCICIO JARDINERIA IV
 
+        Route::add(
+            '/usuario',
+            function () {
+                (new UsuarioController())->getUsuarios();
+            },
+            'get'
+        );
 
+        Route::add(
+            '/usuario/([0-9]+)',
+            function ($codigo) {
+                (new UsuarioController())->getByCodigo((int) $codigo);
+            },
+            'get'
+        );
 
         Route::pathNotFound(
             function () {
