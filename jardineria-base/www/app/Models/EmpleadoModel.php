@@ -47,7 +47,7 @@ class EmpleadoModel extends BaseDbModel
             if (!is_string($data['nombre_completo'])) {
                 throw new InvalidArgumentException('El nombre completo es incorrecto ');
             }else{
-                $condiciones[]= "CONCAT(e.nombre,' ',e.apellido1,' ',e.apellido2) LIKE :nombre_completo";
+                $condiciones[]= "CONCAT(e.nombre,' ',e.apellido1,' ',IFNULL(e.apellido2,'')) LIKE :nombre_completo";
                 $valores['nombre_completo'] = '%'.$data['nombre_completo'].'%';
             }
         }
@@ -103,7 +103,7 @@ class EmpleadoModel extends BaseDbModel
         return $stmt->fetch();
     }
 
-    public function insertEmpleado(array $data):bool
+    public function insertEmpleado(array $data): int | false
     {
         $sql ="INSERT INTO empleado (`nombre`, `apellido1`, `apellido2`, `extension`, `email`, `codigo_oficina`, `codigo_jefe`, `puesto`) 
                 VALUES (:nombre,:apellido1,:apellido2,:extension,:email,:codigo_oficina,:codigo_jefe,:puesto)";
@@ -119,7 +119,8 @@ class EmpleadoModel extends BaseDbModel
         }
 
         $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute($data);
+        $stmt->execute($data);
+        return (int) $this->pdo->lastInsertId();
     }
 
     public function delete(int $codigo_empleado):bool
@@ -159,8 +160,7 @@ class EmpleadoModel extends BaseDbModel
     {
         $sql = "SELECT e.codigo_empleado 
             FROM empleado e 
-            WHERE e.codigo_empleado = :codigo_empleado 
-            AND e.codigo_jefe IS NOT NULL";
+            WHERE e.codigo_empleado = :codigo_empleado";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['codigo_empleado' => $codigo_empleado]);
         return $stmt->rowCount() === 1;

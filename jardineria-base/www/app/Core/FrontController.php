@@ -108,7 +108,7 @@ class FrontController
             function () {
             }
         );
-        
+
         Route::run();
     }
 }
