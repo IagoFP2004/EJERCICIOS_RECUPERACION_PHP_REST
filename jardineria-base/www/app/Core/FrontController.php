@@ -94,6 +94,10 @@ class FrontController
             'patch'
         );
 
+        //EJERCICIO JARDINERIA IV
+
+
+
         Route::pathNotFound(
             function () {
                 (new ErrorController(404))->showError();
