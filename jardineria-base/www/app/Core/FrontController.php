@@ -114,6 +114,30 @@ class FrontController
             'get'
         );
 
+        Route::add(
+            '/usuario',
+            function () {
+                (new UsuarioController())->insertarUsuario();
+            },
+            'post'
+        );
+
+        Route::add(
+            '/usuario/([0-9]+)',
+            function ($codigo) {
+                (new UsuarioController())->deleteUsuario((int) $codigo);
+            },
+            'delete'
+        );
+
+        Route::add(
+            '/usuario/([0-9]+)',
+            function ($codigo) {
+                (new UsuarioController())->updateUsuario((int) $codigo);
+            },
+            'patch'
+        );
+
         Route::pathNotFound(
             function () {
                 (new ErrorController(404))->showError();

@@ -108,4 +108,53 @@ class UsuarioModel extends BaseDbModel
         $stmt->execute(['codigo'=>$codigo]);
         return $stmt->fetch();
     }
+
+    public function insert(array $data):int|false
+    {
+        $sql = 'INSERT INTO `usuario_sistema`(`id_rol`, `email`, `pass`, `nombre`, `idioma`, `baja`) 
+                VALUES (:id_rol,:email,:pass,:nombre,:idioma,:baja)';
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            'id_rol'=>$data['id_rol'],
+            'email'=>$data['email'],
+            'pass'=>password_hash($data['password'],PASSWORD_DEFAULT),
+            'nombre'=>$data['nombre'],
+            'idioma'=>$data['idioma'],
+            'baja'=>$data['baja']
+        ]);
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    public function delete(int $codigo):bool
+    {
+        $sql = "DELETE FROM usuario_sistema WHERE id_usuario = :codigo";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['codigo'=>$codigo]);
+        return $stmt->rowCount() === 1;
+    }
+
+    public function patch(int $codigo,array $data):bool
+    {
+        if(!empty($data)){
+            $sql = 'UPDATE usuario_sistema SET';
+            $campos = [];
+            foreach ($data as $column => $value) {
+                $campos[] = "`$column` = :$column";
+            }
+            $sql .= implode(', ', $campos);
+            $sql .= " WHERE id_usuario = :codigo";
+            $data['codigo'] = $codigo;
+            return $stmt = $this->pdo->prepare($sql)->execute($data);
+        }else{
+            return false;
+        }
+    }
+
+    public function getByEmail(string $email):array | false
+    {
+        $sql = "SELECT * FROM usuario_sistema WHERE email = :email";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['email'=>$email]);
+        return $stmt->fetch();
+    }
 }
