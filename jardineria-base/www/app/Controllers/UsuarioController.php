@@ -239,17 +239,14 @@ class UsuarioController extends BaseController
     public function checkChangePassword(array $data):array
     {
         $errors = [];
-
         if (empty($data['old_password'])) {
             $errors['old_password']='Se necesita la anterior contraseña';
         }
-
         if (empty($data['new_password'])) {
             $errors['new_password'] = "Indique la contraseña para enviar";
         }else if (!preg_match("/^(?=.*[a-z])(?=.*\d).{8,}$/",$data['new_password'])) {
             $errors['new_password'] = "La nueva contraseña debe tener una longitud >= 8 y contener al menos una letra y un número";
         }
-
         return $errors;
     }
 
