@@ -2,22 +2,47 @@
 
 namespace Com\Jardineria\Core;
 
+use Ahc\Jwt\JWT;
+use Ahc\Jwt\JWTException;
 use Com\Jardineria\Controllers\EmpleadoController;
 use Com\Jardineria\Controllers\ErrorController;
 use Com\Jardineria\Controllers\ProductoController;
 use Com\Jardineria\Controllers\UsuarioController;
+use Com\Jardineria\Helpers\JwtTool;
 use Com\Jardineria\Models\UsuarioModel;
 use Steampixel\Route;
 
 class FrontController
 {
+    private static ?array $jwtData = null;
+    private static array $permisos = [];
     public static function main()
     {
+
+        if (JwtTool::requestHasToken()){
+            try {
+                $bearer = JwtTool::getBearerToken();
+                $jwt = new JWT($_ENV['secreto']);
+                self::$jwtData = $jwt->decode($bearer);
+                self::$permisos = UsuarioController::getPermisos(self::$jwtData['user_type']);
+            }catch (JWTException $e){
+                $controller = new ErrorController(403,['mensaje'=>$e->getMessage()]);
+                $controller->showError();
+                die();
+            }
+        }else{
+            self::$permisos = UsuarioController::getPermisos();
+        }
+
         //EJERCICIO JARDINERIA I
         Route::add(
             '/producto',
             function () {
-                (new ProductoController())->getProductos();
+                if (str_contains(self::$permisos['producto'],'r')){
+                    (new ProductoController())->getProductos();
+                }else{
+                    http_response_code(403);
+                }
             },
             'get'
         );
@@ -25,7 +50,11 @@ class FrontController
         Route::add(
             '/producto',
             function () {
-                (new ProductoController())->insertarProducto();
+                if (str_contains(self::$permisos['producto'],'w')) {
+                    (new ProductoController())->insertarProducto();
+                }else{
+                    http_response_code(403);
+                }
             },
             'post'
         );
@@ -33,7 +62,11 @@ class FrontController
         Route::add(
             '/producto/(.{1,15})',
             function ($codigo) {
-                (new ProductoController())->getProducto((string)$codigo);
+                if (str_contains(self::$permisos['producto'],'r')) {
+                    (new ProductoController())->getProducto((string)$codigo);
+                }else{
+                    http_response_code(403);
+                }
             },
             'get'
         );
@@ -41,7 +74,11 @@ class FrontController
         Route::add(
             '/producto/(.{1,15})',
             function ($codigo) {
-                (new ProductoController())->deleteProducto((string)$codigo);
+                if (str_contains(self::$permisos['producto'],'d')) {
+                    (new ProductoController())->deleteProducto((string)$codigo);
+                }else{
+                    http_response_code(403);
+                }
             },
             'delete'
         );
@@ -49,7 +86,11 @@ class FrontController
         Route::add(
             '/producto/(.{1,15})',
             function ($codigo) {
-                (new ProductoController())->updateProducto((string)$codigo);
+                if (str_contains(self::$permisos['producto'],'w')) {
+                    (new ProductoController())->updateProducto((string)$codigo);
+                }else{
+                    http_response_code(403);
+                }
             },
             'patch'
         );
@@ -59,7 +100,11 @@ class FrontController
         Route::add(
             '/empleado',
             function () {
-                (new EmpleadoController())->getEmpleados();
+                if (str_contains(self::$permisos['empleado'],'r')) {
+                    (new EmpleadoController())->getEmpleados();
+                }else{
+                    http_response_code(403);
+                }
             },
             'get'
         );
@@ -67,7 +112,11 @@ class FrontController
         Route::add(
             '/empleado/([0-9]+)',
             function ($codigo) {
-                (new EmpleadoController())->getEmpleado((int) $codigo);
+                if (str_contains(self::$permisos['empleado'],'r')) {
+                    (new EmpleadoController())->getEmpleado((int)$codigo);
+                }else{
+                    http_response_code(403);
+                }
             },
             'get'
         );
@@ -75,7 +124,11 @@ class FrontController
         Route::add(
             '/empleado',
             function () {
-                (new EmpleadoController())->insertEmpleado();
+                if (str_contains(self::$permisos['empleado'],'w')) {
+                    (new EmpleadoController())->insertEmpleado();
+                }else{
+                    http_response_code(403);
+                }
             },
             'post'
         );
@@ -83,7 +136,11 @@ class FrontController
         Route::add(
             '/empleado/([0-9]+)',
             function ($codigo) {
-                (new EmpleadoController())->deleteEmpleado((int) $codigo);
+                if (str_contains(self::$permisos['empleado'],'d')) {
+                    (new EmpleadoController())->deleteEmpleado((int)$codigo);
+                }else{
+                    http_response_code(403);
+                }
             },
             'delete'
         );
@@ -91,12 +148,24 @@ class FrontController
         Route::add(
             '/empleado/([0-9]+)',
             function ($codigo) {
-                (new EmpleadoController())->updateEmpleado((int) $codigo);
+                if (str_contains(self::$permisos['empleado'],'w')) {
+                    (new EmpleadoController())->updateEmpleado((int)$codigo);
+                }else{
+                    http_response_code(403);
+                }
             },
             'patch'
         );
 
         //EJERCICIO JARDINERIA IV
+
+        Route::add(
+            '/login',
+            function () {
+                (new UsuarioController())->login();
+            },
+            'post'
+        );
 
         Route::add(
             '/usuario',

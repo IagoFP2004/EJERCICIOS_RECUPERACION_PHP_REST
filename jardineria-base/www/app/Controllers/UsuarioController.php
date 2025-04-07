@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace Com\Jardineria\Controllers;
 
+use Ahc\Jwt\JWT;
 use Com\Jardineria\Core\BaseController;
 use Com\Jardineria\Libraries\Respuesta;
 use Com\Jardineria\Models\RolModel;
@@ -12,6 +13,10 @@ use Couchbase\BaseException;
 class UsuarioController extends BaseController
 {
     public const CAMPOS = ['id_usuario','email','nombre','last_date','idioma','baja','id_rol','rol'];
+
+    public const ROL_ADMINISTRADOR = 1;
+    public const ROL_JARDINERO = 2;
+    public const ROL_FACTURACION = 3;
 
     use BaseRestController;
     public function getUsuarios():void
@@ -93,6 +98,48 @@ class UsuarioController extends BaseController
             }
         }
         $this->view->show('json.view.php',['respuesta'=>$respuesta]);
+    }
+
+    public function login():void
+    {
+        if (empty($_POST['email']) || empty($_POST['password'])){
+            $respuesta = new Respuesta(400,['error'=>'Es necesario enviar email y contraseña']);
+        }else{
+            $modelo = new UsuarioModel();
+            $login = $modelo->getByEmail($_POST['email']);
+            if ($login !== false){
+                if (password_verify($_POST['password'],$login['pass'])){
+                    $payload =[
+                        'name'=>$login['nombre'],
+                        'user_type'=>$login['id_rol'],
+                        'email'=>$login['email'],
+                    ];
+                    $jwt = new JWT($_ENV['secreto'],'HS256',1800);
+                    $token = $jwt->encode($payload);
+                    $respuesta = new Respuesta(200,['Token'=>$token]);
+                }else{
+                    $respuesta = new Respuesta(403,['error'=>'La contraseña es incorrecta']);
+                }
+            }else{
+                $respuesta = new Respuesta(403,['error'=>'El email no existe']);
+            }
+        }
+        $this->view->show('json.view.php',['respuesta'=>$respuesta]);
+    }
+
+    public static function getPermisos(int $idRol=-1):array
+    {
+        $permisos = [
+            'productos'=>'',
+            'pedidos'=>'',
+            'empleado'=>'',
+        ];
+        return match ($idRol){
+            self::ROL_ADMINISTRADOR=>array_replace($permisos,['productos'=>'rwd','pedidos'=>'rwd','empleado'=>'rwd']),
+            self::ROL_JARDINERO=>array_replace($permisos,['productos'=>'rwd','pedidos'=>'','empleado'=>'']),
+            self::ROL_FACTURACION=>array_replace($permisos,['productos'=>'','pedidos'=>'rwd','empleado'=>'rw']),
+            default=>$permisos
+        };
     }
 
     public function checkErrors(array $data, ?int $codigo=null):array
