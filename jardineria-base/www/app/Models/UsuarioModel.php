@@ -157,4 +157,13 @@ class UsuarioModel extends BaseDbModel
         $stmt->execute(['email'=>$email]);
         return $stmt->fetch();
     }
+
+    public function changePasswordUser(string $email,string $new_password):bool
+    {
+        $sql = "UPDATE usuario_sistema SET pass = :new_password WHERE email = :email";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':new_password',password_hash($new_password,PASSWORD_DEFAULT));
+        $stmt->bindParam(':email',$email);
+        return $stmt->execute();
+    }
 }

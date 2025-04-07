@@ -142,6 +142,30 @@ class UsuarioController extends BaseController
         };
     }
 
+    public function changePassword(string $email):void
+    {
+        $put = $this->getParams();
+        $errores = $this->checkChangePassword($put);
+
+        if ($errores ===[]){
+            $model = new UsuarioModel();
+            $login = $model->getByEmail($email);
+
+            if ($login !== false && password_verify($put['old_password'],$login['pass'])){
+                if ($model->changePasswordUser($email,$put['new_password'])){
+                    $respuesta = new Respuesta(200,['Exito'=>'La contraseña ha sido actualizada']);
+                }else{
+                    $respuesta = new Respuesta(500,['Error'=>'No se pudo actualizar la contraseña']);
+                }
+            }else{
+                $respuesta = new Respuesta(403,['mensaje'=>'La contraseña es incorrecta']);
+            }
+        }else{
+            $respuesta = new Respuesta(403, $errores);
+        }
+        $this->view->show('json.view.php',['respuesta'=>$respuesta]);
+    }
+
     public function checkErrors(array $data, ?int $codigo=null):array
     {
         $errors = [];
@@ -211,5 +235,23 @@ class UsuarioController extends BaseController
 
         return $errors;
     }
+
+    public function checkChangePassword(array $data):array
+    {
+        $errors = [];
+
+        if (empty($data['old_password'])) {
+            $errors['old_password']='Se necesita la anterior contraseña';
+        }
+
+        if (empty($data['new_password'])) {
+            $errors['new_password'] = "Indique la contraseña para enviar";
+        }else if (!preg_match("/^(?=.*[a-z])(?=.*\d).{8,}$/",$data['new_password'])) {
+            $errors['new_password'] = "La nueva contraseña debe tener una longitud >= 8 y contener al menos una letra y un número";
+        }
+
+        return $errors;
+    }
+
 }
 

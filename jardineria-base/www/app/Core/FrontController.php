@@ -168,6 +168,18 @@ class FrontController
         );
 
         Route::add(
+            '/change-password',
+            function () {
+                if(self::$jwtData!==null){
+                    (new UsuarioController())->changePassword((string) self::$jwtData['email']);
+                }else{
+                    http_response_code(403);
+                }
+            },
+            'put'
+        );
+
+        Route::add(
             '/usuario',
             function () {
                 (new UsuarioController())->getUsuarios();
