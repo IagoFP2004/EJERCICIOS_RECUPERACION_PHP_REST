@@ -6,6 +6,7 @@ use Ahc\Jwt\JWT;
 use Ahc\Jwt\JWTException;
 use Com\Jardineria\Controllers\EmpleadoController;
 use Com\Jardineria\Controllers\ErrorController;
+use Com\Jardineria\Controllers\PedidoController;
 use Com\Jardineria\Controllers\ProductoController;
 use Com\Jardineria\Controllers\UsuarioController;
 use Com\Jardineria\Helpers\JwtTool;
@@ -161,7 +162,7 @@ class FrontController
         Route::add(
             '/pedido',
             function () {
-                (new UsuarioController())->login();
+                (new PedidoController())->getPedidos();
             },
             'get'
         );
