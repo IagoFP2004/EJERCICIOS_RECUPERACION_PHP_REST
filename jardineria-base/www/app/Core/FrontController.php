@@ -156,6 +156,16 @@ class FrontController
             'patch'
         );
 
+        //EJERCICIO JARDINERIA III
+
+        Route::add(
+            '/pedido',
+            function () {
+                (new UsuarioController())->login();
+            },
+            'get'
+        );
+
         //EJERCICIO JARDINERIA IV
 
         Route::add(

@@ -130,14 +130,14 @@ class UsuarioController extends BaseController
     public static function getPermisos(int $idRol=-1):array
     {
         $permisos = [
-            'productos'=>'',
+            'producto'=>'',
             'pedidos'=>'',
             'empleado'=>'',
         ];
         return match ($idRol){
-            self::ROL_ADMINISTRADOR=>array_replace($permisos,['productos'=>'rwd','pedidos'=>'rwd','empleado'=>'rwd']),
-            self::ROL_JARDINERO=>array_replace($permisos,['productos'=>'rwd','pedidos'=>'','empleado'=>'']),
-            self::ROL_FACTURACION=>array_replace($permisos,['productos'=>'','pedidos'=>'rwd','empleado'=>'rw']),
+            self::ROL_ADMINISTRADOR=>array_replace($permisos,['producto'=>'rwd','pedidos'=>'rwd','empleado'=>'rwd']),
+            self::ROL_JARDINERO=>array_replace($permisos,['producto'=>'rwd','pedidos'=>'','empleado'=>'']),
+            self::ROL_FACTURACION=>array_replace($permisos,['producto'=>'','pedidos'=>'rwd','empleado'=>'rw']),
             default=>$permisos
         };
     }
