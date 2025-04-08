@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace Com\Jardineria\Models;
 
 use Com\Jardineria\Core\BaseDbModel;
+use DateTime;
 
 class UsuarioModel extends BaseDbModel
 {
@@ -68,22 +69,27 @@ class UsuarioModel extends BaseDbModel
         }
 
         if (!empty($data['fecha_login_min'])){
-            if (!is_string($data['fecha_login_min'])){
+            if (DateTime::createFromFormat('dd/mm/YY', $data['fecha_login_min']) === false){
                 throw new \InvalidArgumentException('La fecha login minima es incorrecta');
             }else{
+                $date = DateTime::createFromFormat('d/m/Y', $data['fecha_login_min']);
+                $fechaFormateada = $date->format('Y-m-d');
                 $condiciones[] = "us.last_date >= :fecha_login_min";
-                $valores['fecha_login_min'] = $data['fecha_login_min'];
+                $valores['fecha_login_min'] = $fechaFormateada;
             }
         }
 
-        if (!empty($data['fecha_login_max'])){
-            if (!is_string($data['fecha_login_max'])){
-                throw new \InvalidArgumentException('La fecha login maxima es incorrecta');
-            }else{
+        if (!empty($data['fecha_login_max'])) {
+            if (DateTime::createFromFormat('d/m/Y', $data['fecha_login_max']) === false) {
+                throw new \InvalidArgumentException('La fecha login máxima es incorrecta');
+            } else {
+                $date = DateTime::createFromFormat('d/m/Y', $data['fecha_login_max']);
+                $fechaFormateada = $date->format('Y-m-d');
                 $condiciones[] = "us.last_date <= :fecha_login_max";
-                $valores['fecha_login_max'] = $data['fecha_login_max'];
+                $valores['fecha_login_max'] = $fechaFormateada;
             }
         }
+
 
         $sql = "SELECT us.id_usuario, us.email,  us.nombre, us.last_date, us.idioma, us.baja, us.id_rol, r.rol  
                 FROM usuario_sistema us 

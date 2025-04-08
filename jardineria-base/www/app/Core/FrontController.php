@@ -18,7 +18,6 @@ class FrontController
     private static array $permisos = [];
     public static function main()
     {
-
         if (JwtTool::requestHasToken()){
             try {
                 $bearer = JwtTool::getBearerToken();
