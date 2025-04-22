@@ -167,6 +167,14 @@ class FrontController
             'get'
         );
 
+        Route::add(
+            '/pedido/([0-9]+)',
+            function ($codigo_pedido) {
+                (new PedidoController())->getPedidoByCode((int)$codigo_pedido);
+            },
+            'get'
+        );
+
         //EJERCICIO JARDINERIA IV
 
         Route::add(

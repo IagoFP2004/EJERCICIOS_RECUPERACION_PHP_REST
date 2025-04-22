@@ -19,4 +19,16 @@ class PedidoController extends BaseController
         }
         $this->view->show('json.view.php',['respuesta'=>$respuesta]);
     }
+
+    public function getPedidoByCode(int $codigo_pedido):void
+    {
+        $modelo = new PedidoModel();
+        $producto = $modelo ->getProducto($codigo_pedido);
+        if($producto !==false){
+            $respuesta = new Respuesta(200,$producto);
+        }else{
+            $respuesta = new Respuesta(400,['Error'=>'El pedido no existe']);
+        }
+        $this->view->show('json.view.php',['respuesta'=>$respuesta]);
+    }
 }
