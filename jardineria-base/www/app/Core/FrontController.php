@@ -175,6 +175,22 @@ class FrontController
             'get'
         );
 
+        Route::add(
+            '/pedido',
+            function () {
+                (new PedidoController())->insertarPedido();
+            },
+            'post'
+        );
+
+        Route::add(
+            '/pedido/([0-9]+)',
+            function ($codigo_pedido) {
+                (new PedidoController())->deletePedido((int)$codigo_pedido);
+            },
+            'delete'
+        );
+
         //EJERCICIO JARDINERIA IV
 
         Route::add(

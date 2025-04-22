@@ -113,7 +113,37 @@ class PedidoModel extends BaseDbModel
                 WHERE p.codigo_pedido = :codigo_pedido";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(["codigo_pedido"=>$codigo_pedido]);
-        return $stmt->fetch();
+        return $stmt->fetch() ?: false;
     }
+
+    public function insertar(array $data):int | false
+    {
+        $sql =" INSERT INTO pedido (`codigo_pedido`, `fecha_pedido`, `fecha_esperada`, `fecha_entrega`, `estado`, `comentarios`, `codigo_cliente`) 
+                VALUES (:codigo_pedido,:fecha_pedido,:fecha_esperada,:fecha_entrega,:estado,:comentarios,:codigo_cliente)";
+
+        if(!isset($data['fecha_entrega'])){
+            $data['fecha_entrega'] = null;
+        }
+        if(!isset($data['estado'])){
+            $data['estado'] = 'Pendiente';
+        }
+        if(!isset($data['comentarios'])){
+            $data['comentarios'] = null;
+        }
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($data);
+        return (int) $this->pdo->lastInsertId();
+
+    }
+
+    public function delete(int $codigo_pedido):bool
+    {
+        $sql = "DELETE FROM pedido WHERE codigo_pedido = :codigo_pedido";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(["codigo_pedido"=>$codigo_pedido]);
+        return $stmt->rowCount() === 1;
+    }
+
 
 }
