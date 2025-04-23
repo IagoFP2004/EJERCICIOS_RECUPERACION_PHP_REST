@@ -30,9 +30,11 @@ class PedidoModel extends BaseDbModel
             $order = 1;
         }
 
-        if (isset($data['sentido'])){
+        if(isset($data['sentido'])){
             if (!in_array(strtolower($data['sentido']), ['asc','desc'])) {
                 throw new \InvalidArgumentException('Sentido no valido, solo se permite asc o desc');
+            }else{
+                $sentido = $data['sentido'];
             }
         }else{
             $sentido = 'asc';
@@ -98,9 +100,25 @@ class PedidoModel extends BaseDbModel
             $sql .= " WHERE ".implode(" AND ", $condiciones);
         }
         $sql.= ' GROUP BY p.codigo_pedido';
+        $sql.= " ORDER BY ".self::ORDER_COLUMNS[$order-1]." ".$sentido;
+        $sql.= " LIMIT ".($page-1)*$_ENV['limite.pagina'].",".$_ENV['limite.pagina'];
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($valores);
-        return $stmt->fetchAll();
+        $result = $stmt->fetchAll();
+
+        $productos = [];
+
+        foreach ($result as &$pedido) {
+            $sql = " SELECT dp.*, p.nombre,p.gama,p.dimensiones,p.proveedor,p.descripcion,p.cantidad_en_stock,p.precio_venta,p.precio_proveedor 
+                    FROM detalle_pedido dp 
+                    LEFT JOIN producto p ON p.codigo_producto = dp.codigo_producto
+                    WHERE dp.codigo_pedido = :codigo_pedido";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(["codigo_pedido"=>$pedido['codigo_pedido']]);
+            $productos[] = $stmt->fetchAll();
+            $pedido['articulos'] = $productos;
+        }
+        return $result;
     }
 
     public function getProducto(int $codigo_pedido):array|false
@@ -134,7 +152,6 @@ class PedidoModel extends BaseDbModel
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($data);
         return (int) $this->pdo->lastInsertId();
-
     }
 
     public function delete(int $codigo_pedido):bool
